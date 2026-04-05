@@ -1,724 +1,292 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Traitome — Reimagining Biology</title>
-  <meta name="description" content="Mega · Swift · Intelligent — Reimagining biology through systems-scale computation" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Traitome Intelligence | 征域</title>
+  <meta name="description" content="Mega · Swift · Intelligent — Reimagining biology through systems-scale computation">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
-    /* ── RESET & VARIABLES ────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --green:  #00ff88;
-      --cyan:   #00e5ff;
-      --purple: #b44bff;
-      --amber:  #ffbd2e;
-      --bg:     #050a0e;
-      --panel:  rgba(0,255,136,.04);
-      --border: rgba(0,255,136,.22);
-      --font:   'Courier New', Courier, monospace;
+      --bg: #030508;
+      --primary: #00ff9d;
+      --cyan: #00e5ff;
+      --purple: #a855f7;
+      --text: #e2e8f0;
+      --text-muted: #64748b;
     }
-
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
     html, body {
-      width: 100%; height: 100%;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
       background: var(--bg);
-      color: var(--green);
-      font-family: var(--font);
-      overflow-x: hidden;
+      font-family: 'Space Grotesk', sans-serif;
     }
-
-    /* ── FIXED CANVASES ─────────────────────────────────────── */
-    #bg-canvas {
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    
+    #dna-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
     }
-
-    /* ── CRT OVERLAY ────────────────────────────────────────── */
-    .scanlines {
-      position: fixed; inset: 0; z-index: 1; pointer-events: none;
-      background: repeating-linear-gradient(
-        to bottom, transparent, transparent 3px,
-        rgba(0,0,0,.15) 3px, rgba(0,0,0,.15) 4px
-      );
-    }
+    
     .vignette {
-      position: fixed; inset: 0; z-index: 2; pointer-events: none;
-      background: radial-gradient(ellipse at center,
-        transparent 55%, rgba(5,10,14,.9) 100%);
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 30%, var(--bg) 90%);
     }
-
-    /* ── LAYOUT ─────────────────────────────────────────────── */
-    main {
-      position: relative; z-index: 10;
-      display: flex; flex-direction: column; align-items: center;
-      min-height: 100vh; padding: 0 1.5rem 6rem;
+    
+    .content {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
     }
-
-    /* ── NAV ────────────────────────────────────────────────── */
-    nav {
-      width: 100%; max-width: 1100px;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 1.4rem 0; border-bottom: 1px solid var(--border);
-    }
-    .nav-logo {
-      font-size: 1.1rem; font-weight: bold; letter-spacing: .14em;
-      color: var(--green); text-shadow: 0 0 14px var(--green);
-    }
-    .nav-logo span { color: var(--cyan); }
-    .nav-links { display: flex; gap: 2rem; font-size: .8rem; letter-spacing: .1em; }
-    .nav-links a {
-      color: rgba(0,255,136,.55); text-decoration: none;
-      transition: color .2s, text-shadow .2s;
-    }
-    .nav-links a:hover { color: var(--green); text-shadow: 0 0 8px var(--green); }
-
-    /* ── HERO ───────────────────────────────────────────────── */
-    .hero {
-      width: 100%; max-width: 1100px;
-      padding: 5.5rem 0 3.5rem;
-      display: flex; flex-direction: column; align-items: flex-start;
-    }
-    .prompt {
-      font-size: .8rem; color: var(--cyan); letter-spacing: .12em;
-      margin-bottom: 1.5rem; display: flex; align-items: center; gap: .4rem;
-    }
-    .prompt-gt { color: var(--green); text-shadow: 0 0 8px var(--green); }
-
-    /* TRAITOME big title */
-    .hero-title {
-      font-size: clamp(3.2rem, 8vw, 7rem);
-      font-weight: 900; line-height: 1; letter-spacing: -.01em;
-      background: linear-gradient(135deg,
-        var(--green) 0%, var(--cyan) 55%, var(--purple) 100%);
-      -webkit-background-clip: text; background-clip: text; color: transparent;
-      filter: drop-shadow(0 0 28px rgba(0,255,136,.5));
+    
+    .brand {
       margin-bottom: 2rem;
     }
-
-    /* pill tags */
-    .tagline-row { display: flex; flex-wrap: wrap; gap: 1rem 2.5rem; margin-bottom: 3rem; }
-    .tag-pill {
-      border: 1px solid var(--border); border-radius: 4px;
-      padding: .3rem .95rem; font-size: .82rem; letter-spacing: .2em;
-      background: var(--panel); text-transform: uppercase;
-      animation: pillGlow 3s ease-in-out infinite alternate;
+    
+    .brand-en {
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, var(--text) 0%, var(--text-muted) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1;
     }
-    .tag-pill:nth-child(1) { color: var(--green); }
-    .tag-pill:nth-child(2) { color: var(--cyan);  animation-delay: 1s; }
-    .tag-pill:nth-child(3) { color: var(--purple);animation-delay: 2s; }
-    @keyframes pillGlow {
-      from { box-shadow: 0 0 4px currentColor; }
-      to   { box-shadow: 0 0 18px currentColor, 0 0 38px currentColor; }
+    
+    .brand-zh {
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--cyan) 50%, var(--purple) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-top: 0.5rem;
+      letter-spacing: 0.5em;
+      padding-left: 0.5em;
     }
-
-    /* TERMINAL WINDOW */
-    .terminal-box {
-      width: 100%; max-width: 780px;
-      background: rgba(0,0,0,.62);
-      border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
-      box-shadow: 0 0 40px rgba(0,255,136,.1), 0 24px 64px rgba(0,0,0,.65);
+    
+    .tagline {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(0.8rem, 1.5vw, 1rem);
+      color: var(--text-muted);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
     }
-    .terminal-bar {
-      background: rgba(0,255,136,.07); padding: .5rem 1rem;
-      display: flex; align-items: center; gap: .45rem;
-      border-bottom: 1px solid var(--border);
+    
+    .tagline-zh {
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--text);
+      letter-spacing: 0.15em;
+      margin-bottom: 2rem;
     }
-    .dot { width: 11px; height: 11px; border-radius: 50%; }
-    .dot-r { background: #ff5f56; } .dot-y { background: #ffbd2e; } .dot-g { background: #27c93f; }
-    .terminal-title {
-      margin: 0 auto; font-size: .72rem; color: rgba(0,255,136,.4); letter-spacing: .1em;
-    }
-    .terminal-body { padding: 1.3rem 1.5rem 1.7rem; font-size: .85rem; line-height: 1.85; min-height: 195px; }
-    .t-line  { display: flex; gap: .55rem; min-height: 1.5em; }
-    .t-ps1   { color: var(--cyan); white-space: nowrap; flex-shrink: 0; }
-    .t-cmd   { color: var(--green); }
-    .t-out   { color: rgba(0,255,136,.68); padding-left: 1.4rem; }
-    .t-cyan  { color: var(--cyan); padding-left: 1.4rem; }
-    .t-prpl  { color: var(--purple); padding-left: 1.4rem; }
-    .cursor  {
-      display: inline-block; width: .52em; height: 1.1em;
-      background: var(--green); vertical-align: text-bottom;
-      animation: blink .85s step-end infinite;
-    }
-    @keyframes blink { 50% { opacity: 0; } }
-
-    /* ── DNA VIEWPORT ───────────────────────────────────────── */
-    #dna-wrap {
-      width: 100%; max-width: 1100px; height: 420px;
-      position: relative; border: 1px solid var(--border); border-radius: 12px;
-      overflow: hidden; background: rgba(0,0,0,.45); margin: 4.5rem 0;
-    }
-    #dna-canvas { width: 100%; height: 100%; display: block; cursor: grab; }
-    #dna-canvas:active { cursor: grabbing; }
-    .dna-label {
-      position: absolute; bottom: 1rem; left: 1.4rem;
-      font-size: .72rem; letter-spacing: .12em; color: rgba(0,255,136,.35);
-      pointer-events: none;
-    }
-
-    /* ── PILLAR CARDS ───────────────────────────────────────── */
+    
     .pillars {
-      width: 100%; max-width: 1100px;
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.6rem; margin-bottom: 5rem;
+      display: flex;
+      gap: 3rem;
+      margin-bottom: 2rem;
     }
-    .card {
-      border: 1px solid var(--border); border-radius: 10px;
-      padding: 2rem 1.8rem; background: var(--panel);
-      backdrop-filter: blur(6px); position: relative; overflow: hidden;
-      transition: transform .3s, box-shadow .3s;
+    
+    .pillar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
     }
-    .card::after {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(135deg, transparent 60%, rgba(0,255,136,.05));
-      pointer-events: none;
+    
+    .pillar-en {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
     }
-    .card:hover {
-      transform: translateY(-6px) scale(1.012);
-      box-shadow: 0 0 40px rgba(0,255,136,.16), 0 24px 56px rgba(0,0,0,.55);
+    
+    .pillar-zh {
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 500;
     }
-    .card:nth-child(2):hover { box-shadow: 0 0 40px rgba(0,229,255,.16), 0 24px 56px rgba(0,0,0,.55); }
-    .card:nth-child(3):hover { box-shadow: 0 0 40px rgba(180,75,255,.16), 0 24px 56px rgba(0,0,0,.55); }
-    .card-num {
-      position: absolute; top: 1.1rem; right: 1.3rem;
-      font-size: 3.5rem; font-weight: 900; color: rgba(0,255,136,.05);
-      line-height: 1; user-select: none;
+    
+    .pillar:nth-child(1) .pillar-en { color: var(--primary); }
+    .pillar:nth-child(1) .pillar-zh { color: var(--primary); }
+    .pillar:nth-child(2) .pillar-en { color: var(--cyan); }
+    .pillar:nth-child(2) .pillar-zh { color: var(--cyan); }
+    .pillar:nth-child(3) .pillar-en { color: var(--purple); }
+    .pillar:nth-child(3) .pillar-zh { color: var(--purple); }
+    
+    .divider {
+      width: 60px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
+      margin: 1rem 0;
     }
-    .card-icon { font-size: 2.3rem; margin-bottom: .9rem; filter: drop-shadow(0 0 8px currentColor); }
-    .card-en {
-      font-size: 1.4rem; font-weight: bold; letter-spacing: .07em;
-      margin-bottom: .25rem; text-shadow: 0 0 12px currentColor;
+    
+    .footer {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
     }
-    .card-zh { font-size: 1.05rem; letter-spacing: .24em; margin-bottom: .9rem; }
-    .card-desc { font-size: .82rem; color: rgba(0,255,136,.58); line-height: 1.8; }
-    /* colour variants */
-    .card:nth-child(1) .card-en  { color: var(--green); }
-    .card:nth-child(1) .card-zh  { color: var(--cyan); }
-    .card:nth-child(2) .card-en  { color: var(--cyan); }
-    .card:nth-child(2) .card-zh  { color: var(--green); }
-    .card:nth-child(3) .card-en  { color: var(--purple); }
-    .card:nth-child(3) .card-zh  { color: var(--purple); }
-
-    /* ── STATS ──────────────────────────────────────────────── */
-    .stats {
-      width: 100%; max-width: 1100px;
-      display: flex; flex-wrap: wrap; justify-content: center;
-      gap: 2.5rem 5rem; margin-bottom: 5rem;
-    }
-    .stat { text-align: center; }
-    .stat-val {
-      font-size: 2.7rem; font-weight: 900;
-      background: linear-gradient(135deg, var(--green), var(--cyan));
-      -webkit-background-clip: text; background-clip: text; color: transparent;
-      filter: drop-shadow(0 0 10px rgba(0,255,136,.5));
-    }
-    .stat-lbl { font-size: .75rem; letter-spacing: .14em; color: rgba(0,255,136,.45); text-transform: uppercase; margin-top: .2rem; }
-
-    /* ── MANIFESTO ──────────────────────────────────────────── */
-    .manifesto {
-      width: 100%; max-width: 900px; text-align: center;
-      padding: 3rem 0 5rem; border-top: 1px solid var(--border);
-    }
-    .manifesto-label { font-size: .72rem; letter-spacing: .26em; color: var(--cyan); margin-bottom: 1.5rem; text-transform: uppercase; }
-    .manifesto-en {
-      font-size: clamp(1.1rem, 2.4vw, 1.5rem);
-      color: rgba(0,255,136,.85); line-height: 1.65; margin-bottom: 1.3rem; letter-spacing: .02em;
-    }
-    .manifesto-div {
-      display: flex; align-items: center; justify-content: center; margin: .8rem 0;
-      gap: 1rem; color: rgba(0,255,136,.2);
-    }
-    .manifesto-div::before,
-    .manifesto-div::after {
-      content: ''; flex: 1; max-width: 4rem; height: 1px; background: var(--border);
-    }
-    .manifesto-zh {
-      font-size: clamp(1.1rem, 2.4vw, 1.5rem);
-      color: var(--cyan); line-height: 1.9; letter-spacing: .18em;
-    }
-
-    /* ── FOOTER ─────────────────────────────────────────────── */
-    footer {
-      width: 100%; max-width: 1100px;
-      padding: 2rem 0; border-top: 1px solid var(--border);
-      display: flex; flex-wrap: wrap; align-items: center;
-      justify-content: space-between; gap: 1rem;
-      font-size: .76rem; color: rgba(0,255,136,.38); letter-spacing: .09em;
-    }
-    footer a { color: var(--cyan); text-decoration: none; }
-    footer a:hover { text-shadow: 0 0 8px var(--cyan); }
-
-    /* ── RESPONSIVE ─────────────────────────────────────────── */
-    @media (max-width: 640px) {
-      .hero { padding: 3rem 0 2rem; }
-      .hero-title { font-size: 2.8rem; }
-      #dna-wrap { height: 280px; }
-      .terminal-body { font-size: .78rem; }
+    
+    @media (max-width: 768px) {
+      .pillars { gap: 1.5rem; }
+      .pillar-en { font-size: 0.6rem; }
+      .pillar-zh { font-size: 1rem; }
     }
   </style>
 </head>
 <body>
-
-<canvas id="bg-canvas"></canvas>
-<div class="scanlines"></div>
-<div class="vignette"></div>
-
-<main>
-  <!-- NAV -->
-  <nav>
-    <div class="nav-logo">TRAIT<span>OME</span></div>
-    <div class="nav-links">
-      <a href="https://github.com/Traitome" target="_blank" rel="noopener">GitHub</a>
-      <a href="#pillars">Mission</a>
-      <a href="#manifesto">Manifesto</a>
+  <canvas id="dna-canvas"></canvas>
+  <div class="vignette"></div>
+  
+  <div class="content">
+    <div class="brand">
+      <div class="brand-en">TRAITOME</div>
+      <div class="brand-zh">征域</div>
     </div>
-  </nav>
-
-  <!-- HERO -->
-  <section class="hero">
-    <div class="prompt"><span class="prompt-gt">&gt;</span> traitome@bio:~$ ./launch --mode=production</div>
-    <h1 class="hero-title">TRAITOME</h1>
-
-    <div class="tagline-row">
-      <div class="tag-pill">MEGA</div>
-      <div class="tag-pill">SWIFT</div>
-      <div class="tag-pill">INTELLIGENT</div>
-    </div>
-
-    <!-- ANIMATED TERMINAL -->
-    <div class="terminal-box">
-      <div class="terminal-bar">
-        <span class="dot dot-r"></span>
-        <span class="dot dot-y"></span>
-        <span class="dot dot-g"></span>
-        <span class="terminal-title">traitome — bash — 80×24</span>
+    
+    <div class="tagline">Mega · Swift · Intelligent</div>
+    <div class="tagline-zh">以系统尺度之算，重思生命之码</div>
+    
+    <div class="pillars">
+      <div class="pillar">
+        <span class="pillar-en">Mega</span>
+        <span class="pillar-zh">海量</span>
       </div>
-      <div class="terminal-body" id="terminal-body"></div>
+      <div class="pillar">
+        <span class="pillar-en">Swift</span>
+        <span class="pillar-zh">极速</span>
+      </div>
+      <div class="pillar">
+        <span class="pillar-en">Intelligent</span>
+        <span class="pillar-zh">智识</span>
+      </div>
     </div>
-  </section>
-
-  <!-- 3-D DNA VIEWER -->
-  <div id="dna-wrap">
-    <canvas id="dna-canvas"></canvas>
-    <div class="dna-label">[ INTERACTIVE · drag to rotate · scroll to zoom ]</div>
+    
+    <div class="divider"></div>
+    
+    <div class="footer">github.com/Traitome</div>
   </div>
-
-  <!-- PILLAR CARDS -->
-  <section class="pillars" id="pillars">
-    <div class="card">
-      <div class="card-num">01</div>
-      <div class="card-icon" style="color:var(--green)">⬡</div>
-      <div class="card-en">Mega</div>
-      <div class="card-zh">海 量</div>
-      <div class="card-desc">
-        Systems-scale datasets encompassing millions of traits,
-        genotypes, and phenotypes — computed at the edge of what
-        modern hardware permits.
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-num">02</div>
-      <div class="card-icon" style="color:var(--cyan)">⚡</div>
-      <div class="card-en">Swift</div>
-      <div class="card-zh">极 速</div>
-      <div class="card-desc">
-        Blazing pipelines that turn raw sequencing data into
-        actionable insights in minutes, not months.
-        Speed is a scientific virtue.
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-num">03</div>
-      <div class="card-icon" style="color:var(--purple)">✦</div>
-      <div class="card-en">Intelligent</div>
-      <div class="card-zh">智 识</div>
-      <div class="card-desc">
-        Machine-learning models that distil petabytes of evolutionary
-        signal into first-principles understanding — biology re-read
-        through the grammar of computation.
-      </div>
-    </div>
-  </section>
-
-  <!-- STATS -->
-  <div class="stats">
-    <div class="stat">
-      <div class="stat-val" id="sv-traits">0</div>
-      <div class="stat-lbl">Traits Modelled</div>
-    </div>
-    <div class="stat">
-      <div class="stat-val" id="sv-species">0</div>
-      <div class="stat-lbl">Species Covered</div>
-    </div>
-    <div class="stat">
-      <div class="stat-val" id="sv-data">0</div>
-      <div class="stat-lbl">TB of Genomic Data</div>
-    </div>
-    <div class="stat">
-      <div class="stat-val" id="sv-speed">0×</div>
-      <div class="stat-lbl">Faster than Baseline</div>
-    </div>
-  </div>
-
-  <!-- MANIFESTO -->
-  <section class="manifesto" id="manifesto">
-    <div class="manifesto-label">// core mission</div>
-    <p class="manifesto-en">Reimagining biology through systems-scale computation</p>
-    <div class="manifesto-div">✦</div>
-    <p class="manifesto-zh">以系统尺度之算，重思生命之码</p>
-  </section>
-
-  <!-- FOOTER -->
-  <footer>
-    <div>© 2024 – 2026 &nbsp;<strong style="color:var(--green)">Traitome</strong>&nbsp; Organization</div>
-    <div>Built with ♥ &amp; science &nbsp;·&nbsp;
-      <a href="https://github.com/Traitome" target="_blank" rel="noopener">github.com/Traitome</a>
-    </div>
-  </footer>
-</main>
-
-<script>
-/* =============================================================
-   SECTION 1 — BACKGROUND PARTICLE FIELD (Canvas 2D)
-   Stars + floating dots wired to mouse parallax
-============================================================= */
-(function bgParticles() {
-  const canvas = document.getElementById('bg-canvas');
-  const ctx    = canvas.getContext('2d');
-  let W, H;
-
-  const PALETTE = ['#00ff88', '#00e5ff', '#b44bff', '#00ff8855', '#00e5ff55'];
-  const N = 260;
-  let mouse = { x: 0, y: 0 };
-
-  const stars = Array.from({ length: N }, () => ({
-    x:   Math.random(),
-    y:   Math.random(),
-    r:   Math.random() * 1.5 + .3,
-    vx:  (Math.random() - .5) * .00015,
-    vy:  (Math.random() - .5) * .00015,
-    col: PALETTE[Math.floor(Math.random() * PALETTE.length)],
-    parallax: Math.random() * .04 + .005,
-  }));
-
-  function resize() {
-    W = canvas.width  = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-  }
-  window.addEventListener('resize', resize);
-  window.addEventListener('mousemove', e => { mouse.x = e.clientX / W; mouse.y = e.clientY / H; });
-  resize();
-
-  function draw() {
-    requestAnimationFrame(draw);
-    ctx.clearRect(0, 0, W, H);
-    for (const s of stars) {
-      s.x = (s.x + s.vx + 1) % 1;
-      s.y = (s.y + s.vy + 1) % 1;
-      const px = ((s.x + (mouse.x - .5) * s.parallax + 1) % 1) * W;
-      const py = ((s.y + (mouse.y - .5) * s.parallax + 1) % 1) * H;
-      ctx.beginPath();
-      ctx.arc(px, py, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = s.col;
-      ctx.fill();
-    }
-  }
-  draw();
-})();
-
-
-/* =============================================================
-   SECTION 2 — 3-D DNA HELIX (Canvas 2D with perspective math)
-============================================================= */
-(function dnaViewer() {
-  const canvas = document.getElementById('dna-canvas');
-  const wrap   = document.getElementById('dna-wrap');
-  const ctx    = canvas.getContext('2d');
-
-  // ----- geometry params ------
-  const STEPS   = 80;
-  const TURNS   = 4.5;
-  const RADIUS  = 0.22;   // fraction of min(W,H)
-  const HEIGHT  = 0.72;   // fraction of H
-  const FOCAL   = 2.2;    // perspective strength
-
-  // base-pair colours (A/T/G/C)
-  const BASE_COLS = ['#00ff88', '#00e5ff', '#b44bff', '#ffbd2e'];
-
-  // ----- state -----
-  let W, H;
-  let rotY  =  0.3;
-  let rotX  = -0.12;
-  let zoom  =  1;
-  let isDragging = false;
-  let lastX = 0, lastY = 0;
-  let velX  = 0, velY  = 0;
-  let autoSpin = true;
-
-  function resize() {
-    W = canvas.width  = wrap.clientWidth;
-    H = canvas.height = wrap.clientHeight;
-  }
-  window.addEventListener('resize', resize);
-  resize();
-
-  // ----- mouse / touch -----
-  function startDrag(x, y) { isDragging = true; lastX = x; lastY = y; autoSpin = false; }
-  function moveDrag(x, y) {
-    if (!isDragging) return;
-    const dx = x - lastX, dy = y - lastY;
-    velX = dx * .008; velY = dy * .008;
-    rotY += velX; rotX += velY;
-    lastX = x; lastY = y;
-  }
-  function endDrag() { isDragging = false; }
-
-  canvas.addEventListener('mousedown',  e => startDrag(e.clientX, e.clientY));
-  window.addEventListener('mousemove',  e => moveDrag(e.clientX, e.clientY));
-  window.addEventListener('mouseup',    endDrag);
-  canvas.addEventListener('touchstart', e => startDrag(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
-  canvas.addEventListener('touchmove',  e => moveDrag(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
-  canvas.addEventListener('touchend',   endDrag, { passive: true });
-  wrap.addEventListener('wheel', e => {
-    zoom = Math.max(.5, Math.min(2, zoom - e.deltaY * .001));
-  }, { passive: true });
-
-  // ----- 3-D projection helpers -----
-  function rotateXY(x, y, z, ax, ay) {
-    // rotate around Y axis
-    let nx =  x * Math.cos(ay) + z * Math.sin(ay);
-    let nz = -x * Math.sin(ay) + z * Math.cos(ay);
-    // rotate around X axis
-    let ny =  y * Math.cos(ax) - nz * Math.sin(ax);
-    let nz2 = y * Math.sin(ax) + nz * Math.cos(ax);
-    return [nx, ny, nz2];
-  }
-  function project(x, y, z) {
-    const scale = FOCAL / (FOCAL + z);
-    return { sx: W / 2 + x * scale * W * .42 * zoom,
-             sy: H / 2 + y * scale * H * .42 * zoom,
-             scale };
-  }
-
-  // ----- build helix points -----
-  function buildHelix() {
-    const pts = [];
-    for (let i = 0; i < STEPS; i++) {
-      const t      = i / (STEPS - 1);
-      const angle  = t * Math.PI * 2 * TURNS;
-      const yPos   = (t - .5) * HEIGHT * 2;
-      const r      = RADIUS * 2;
-      pts.push({
-        // strand 1
-        x1: Math.cos(angle) * r,
-        y1: yPos,
-        z1: Math.sin(angle) * r,
-        // strand 2
-        x2: Math.cos(angle + Math.PI) * r,
-        y2: yPos,
-        z2: Math.sin(angle + Math.PI) * r,
-        color: BASE_COLS[i % 4],
-        colorB: BASE_COLS[(i + 2) % 4],
-        t,
-      });
-    }
-    return pts;
-  }
-
-  let t = 0;
-  function draw() {
-    requestAnimationFrame(draw);
-    t += 0.003;
-
-    if (!isDragging) {
-      velX *= .93; velY *= .93;
-      rotY += velX;
-      rotX += velY;
-      if (autoSpin) rotY += .007;
-    }
-
-    ctx.clearRect(0, 0, W, H);
-
-    const pts = buildHelix();
-
-    // ----- collect all draw items for depth-sort -----
-    const items = [];
-
-    for (let i = 0; i < pts.length; i++) {
-      const p = pts[i];
-
-      const [rx1, ry1, rz1] = rotateXY(p.x1, p.y1, p.z1, rotX, rotY);
-      const [rx2, ry2, rz2] = rotateXY(p.x2, p.y2, p.z2, rotX, rotY);
-      const p1 = project(rx1, ry1, rz1);
-      const p2 = project(rx2, ry2, rz2);
-
-      // rung (connecting bar)
-      items.push({
-        type: 'rung',
-        p1, p2,
-        z: (rz1 + rz2) / 2,
-        alpha: .35 + .25 * p.t,
-      });
-
-      // strand 1 sphere
-      items.push({ type: 'sphere', px: p1.sx, py: p1.sy, scale: p1.scale, z: rz1, color: p.color });
-      // strand 2 sphere
-      items.push({ type: 'sphere', px: p2.sx, py: p2.sy, scale: p2.scale, z: rz2, color: p.colorB });
-
-      // backbone segments (to next point)
-      if (i < pts.length - 1) {
-        const q = pts[i + 1];
-        const [qx1, qy1, qz1] = rotateXY(q.x1, q.y1, q.z1, rotX, rotY);
-        const [qx2, qy2, qz2] = rotateXY(q.x2, q.y2, q.z2, rotX, rotY);
-        const qp1 = project(qx1, qy1, qz1);
-        const qp2 = project(qx2, qy2, qz2);
-        items.push({ type: 'backbone', p1, p2: qp1, z: (rz1 + qz1) / 2, color: '#00ff88', w: 2.5 });
-        items.push({ type: 'backbone', p1: p2, p2: qp2, z: (rz2 + qz2) / 2, color: '#00e5ff', w: 2.5 });
+  
+  <script>
+    (function() {
+      const canvas = document.getElementById('dna-canvas');
+      const ctx = canvas.getContext('2d');
+      let W, H, rotation = 0;
+      
+      function resize() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
       }
-    }
-
-    // depth sort (back to front)
-    items.sort((a, b) => a.z - b.z);
-
-    // draw
-    for (const item of items) {
-      ctx.save();
-      if (item.type === 'rung') {
-        ctx.strokeStyle = `rgba(180,180,180,${item.alpha})`;
-        ctx.lineWidth   = 1.5 * zoom;
-        ctx.beginPath();
-        ctx.moveTo(item.p1.sx, item.p1.sy);
-        ctx.lineTo(item.p2.sx, item.p2.sy);
-        ctx.stroke();
-      } else if (item.type === 'backbone') {
-        ctx.strokeStyle = item.color;
-        ctx.lineWidth   = item.w * zoom * item.p1.scale;
-        ctx.shadowColor = item.color;
-        ctx.shadowBlur  = 8 * zoom;
-        ctx.beginPath();
-        ctx.moveTo(item.p1.sx, item.p1.sy);
-        ctx.lineTo(item.p2.sx, item.p2.sy);
-        ctx.stroke();
-      } else if (item.type === 'sphere') {
-        const r = Math.max(2, 5.5 * item.scale * zoom);
-        const grad = ctx.createRadialGradient(
-          item.px - r * .3, item.py - r * .3, r * .1,
-          item.px, item.py, r
-        );
-        grad.addColorStop(0, '#ffffff');
-        grad.addColorStop(.3, item.color);
-        grad.addColorStop(1, item.color + '44');
-        ctx.shadowColor = item.color;
-        ctx.shadowBlur  = 14 * item.scale * zoom;
-        ctx.beginPath();
-        ctx.arc(item.px, item.py, r, 0, Math.PI * 2);
-        ctx.fillStyle = grad;
-        ctx.fill();
+      window.addEventListener('resize', resize);
+      resize();
+      
+      const basePairs = 50;
+      const radius = Math.min(W, H) * 0.15;
+      const height = Math.min(W, H) * 0.5;
+      const colors = ['#00ff9d', '#00e5ff', '#a855f7', '#f59e0b'];
+      
+      function draw() {
+        ctx.fillStyle = 'rgba(3, 5, 8, 0.15)';
+        ctx.fillRect(0, 0, W, H);
+        
+        const centerX = W / 2;
+        const centerY = H / 2;
+        
+        rotation += 0.005;
+        
+        const points = [];
+        for (let i = 0; i < basePairs; i++) {
+          const t = i / (basePairs - 1);
+          const angle = t * Math.PI * 8 + rotation;
+          const y = (t - 0.5) * height;
+          
+          const x1 = Math.cos(angle) * radius;
+          const z1 = Math.sin(angle) * radius;
+          const x2 = Math.cos(angle + Math.PI) * radius;
+          const z2 = Math.sin(angle + Math.PI) * radius;
+          
+          points.push({ x: x1, y: y, z: z1, color: colors[i % 4], t });
+          points.push({ x: x2, y: y, z: z2, color: colors[(i + 2) % 4], t });
+        }
+        
+        points.sort((a, b) => a.z - b.z);
+        
+        // Draw connections
+        for (let i = 0; i < basePairs; i++) {
+          const t = i / (basePairs - 1);
+          const angle = t * Math.PI * 8 + rotation;
+          const y = (t - 0.5) * height;
+          const x1 = Math.cos(angle) * radius;
+          const z1 = Math.sin(angle) * radius;
+          const x2 = Math.cos(angle + Math.PI) * radius;
+          const z2 = Math.sin(angle + Math.PI) * radius;
+          
+          const scale1 = 1 / (1 + z1 / 400);
+          const scale2 = 1 / (1 + z2 / 400);
+          
+          if (z1 > -100 && z2 > -100) {
+            ctx.beginPath();
+            ctx.moveTo(centerX + x1 * scale1, centerY + y * scale1);
+            ctx.lineTo(centerX + x2 * scale2, centerY + y * scale2);
+            ctx.strokeStyle = `rgba(100, 116, 139, ${0.1 * scale1})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+        
+        // Draw points with glow
+        points.forEach(p => {
+          const scale = 1 / (1 + p.z / 400);
+          const alpha = (p.z + radius) / (radius * 2);
+          const r = 3 * scale;
+          
+          // Glow
+          const grad = ctx.createRadialGradient(
+            centerX + p.x * scale, centerY + p.y * scale, 0,
+            centerX + p.x * scale, centerY + p.y * scale, r * 4
+          );
+          grad.addColorStop(0, p.color);
+          grad.addColorStop(0.4, p.color + '40');
+          grad.addColorStop(1, 'transparent');
+          
+          ctx.beginPath();
+          ctx.arc(centerX + p.x * scale, centerY + p.y * scale, r * 4, 0, Math.PI * 2);
+          ctx.fillStyle = grad;
+          ctx.globalAlpha = Math.max(0, alpha * 0.5);
+          ctx.fill();
+          
+          // Core
+          ctx.beginPath();
+          ctx.arc(centerX + p.x * scale, centerY + p.y * scale, r, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = Math.max(0.3, alpha);
+          ctx.fill();
+        });
+        
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(draw);
       }
-      ctx.restore();
-    }
-  }
-  draw();
-})();
-
-
-/* =============================================================
-   SECTION 3 — TERMINAL TYPEWRITER ANIMATION
-============================================================= */
-(function terminalAnim() {
-  const body = document.getElementById('terminal-body');
-
-  const script = [
-    { t: 'cmd',  ps: 'traitome@bio:~$', text: 'python traitome init --org Traitome' },
-    { t: 'out',  cls: 't-cyan', text: '[ OK ] Loading systems-biology engine …' },
-    { t: 'out',  cls: 't-out',  text: '[ OK ] Connecting to genomic data lakes …' },
-    { t: 'out',  cls: 't-out',  text: '[ OK ] Calibrating ML inference stack …' },
-    { t: 'gap' },
-    { t: 'cmd',  ps: 'traitome@bio:~$', text: 'traitome status --verbose' },
-    { t: 'out',  cls: 't-cyan', text: '  ✦  Mission   : Reimagining biology through systems-scale computation' },
-    { t: 'out',  cls: 't-out',  text: '  ⬡  Scale     : MEGA    — millions of traits, genotypes & phenotypes' },
-    { t: 'out',  cls: 't-out',  text: '  ⚡  Speed     : SWIFT   — raw reads → insights in minutes' },
-    { t: 'out',  cls: 't-prpl', text: '  ✦  AI/ML     : INTELLIGENT — first-principles biology from petabytes' },
-    { t: 'gap' },
-    { t: 'cmd',  ps: 'traitome@bio:~$', text: 'echo "以系统尺度之算，重思生命之码"' },
-    { t: 'out',  cls: 't-cyan', text: '以系统尺度之算，重思生命之码' },
-    { t: 'gap' },
-    { t: 'prompt' },
-  ];
-
-  let idx = 0;
-
-  function appendLine(html) {
-    const div = document.createElement('div');
-    div.className = 't-line';
-    div.innerHTML = html;
-    body.appendChild(div);
-    return div;
-  }
-
-  function typeText(el, text, speed, cb) {
-    let i = 0;
-    function step() {
-      el.textContent = text.slice(0, ++i);
-      if (i < text.length) setTimeout(step, speed);
-      else if (cb) setTimeout(cb, 60);
-    }
-    step();
-  }
-
-  function next() {
-    if (idx >= script.length) return;
-    const s = script[idx++];
-
-    if (s.t === 'gap') {
-      appendLine('&nbsp;');
-      setTimeout(next, 100);
-    } else if (s.t === 'prompt') {
-      appendLine(`<span class="t-ps1">${s.ps || 'traitome@bio:~$'}</span>&nbsp;<span class="cursor"></span>`);
-    } else if (s.t === 'out') {
-      const div  = appendLine(`<span class="${s.cls}"></span>`);
-      const span = div.querySelector('span');
-      typeText(span, s.text, 10, next);
-    } else if (s.t === 'cmd') {
-      const div  = appendLine(`<span class="t-ps1">${s.ps}</span>&nbsp;<span class="t-cmd"></span>`);
-      const span = div.querySelector('.t-cmd');
-      setTimeout(() => typeText(span, s.text, 22, () => setTimeout(next, 300)), 150);
-    }
-  }
-
-  setTimeout(next, 700);
-})();
-
-
-/* =============================================================
-   SECTION 4 — ANIMATED COUNTER
-============================================================= */
-(function counters() {
-  const targets = [
-    { id: 'sv-traits',  end: 2847, sfx: '' },
-    { id: 'sv-species', end: 384,  sfx: '' },
-    { id: 'sv-data',    end: 96,   sfx: '' },
-    { id: 'sv-speed',   end: 1200, sfx: '×' },
-  ];
-
-  const io = new IntersectionObserver(entries => {
-    if (!entries[0].isIntersecting) return;
-    io.disconnect();
-    const DUR = 1800, STEP = 16;
-    targets.forEach(({ id, end, sfx }) => {
-      const el  = document.getElementById(id);
-      let cur   = 0;
-      const inc = end / (DUR / STEP);
-      const t   = setInterval(() => {
-        cur = Math.min(cur + inc, end);
-        el.textContent = Math.round(cur).toLocaleString() + sfx;
-        if (cur >= end) clearInterval(t);
-      }, STEP);
-    });
-  }, { threshold: .3 });
-
-  io.observe(document.querySelector('.stats'));
-})();
-</script>
+      draw();
+    })();
+  </script>
 </body>
 </html>
